@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+		<script type="text/javascript" src="/static/echarts.min.js"></script>
+    <script type="text/javascript" src="/static/jquery-3.1.1.js"></script>
+    <title>人体健康信息采集系统</title>
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" style="margin-left:175px; font-size:30px" href="#">人体健康信息采集系统</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+					{% if not valid %}
+          <form class="navbar-form navbar-right" method="POST">
+						{% csrf_token %}
+            <div class="form-group">
+              <input placeholder="Account" class="form-control" type="text" name="account">
+            </div>
+            <div class="form-group">
+              <input placeholder="Password" class="form-control" type="password" name="password">
+            </div>
+            <button type="submit" class="btn btn-success">登录</button>
+            <button type="submit" class="btn btn-success">注册</button>
+          </form>
+					{% else %}
+          <form class="navbar-form navbar-right" method="POST">
+						{% csrf_token %}
+					  <div class="navbar-right">
+						<input style="display:none;" value="None" name="out">
+					  <label class="label">{{account}}</label>
+            <button type="submit" class="btn btn-success">退出</button>
+					</div>
+          </form>
+					{% endif %}
+        </div>
+      </div>
+    </nav>
+		<div style="width:100%;height:60px;"></div>
+
+  <div style="margin:0 auto; width:99%;">
+		<div style="width:800px; height:350px; float:left;">
+			<div style="width:400px; height:100px;margin: 0 auto;">
+				<table class="table table-bordered">
+								<thead>
+									<tr>
+										<th>心率</th>
+										<th>上限值</th>
+										<th>下限值</th>
+										<th>探头状态</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+                    <td>65</td>
+                    <td>100</td>
+                    <td>60</td>
+                    <td>连接</td>
+										<!-- <td>&nbsp</td> -->
+										<!-- <td>&nbsp</td> -->
+										<!-- <td>&nbsp</td> -->
+										<!-- <td>未连接</td> -->
+									</tr>
+								</tbody>
+				</table>
+	</div>
+<div id="heart" style="width:800px; height:250px; float:left;"></div>
+		</div>
+
+<div style="width:500px; height:350px; float:left;">
+	<div style="width:250px; height:100px; margin:0 auto;">
+		<table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>上限值</th>
+                <th>下限值</th>
+								<th>探头状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>89</td>
+                <td>80</td>
+                <td>连接</td>
+                <!-- <td>&nbsp</td> -->
+                <!-- <td>&nbsp</td> -->
+                <!-- <td>未连接</td> -->
+              </tr>
+            </tbody>
+    </table>
+	</div>
+	<div id='relax' style="width:500px; height:250px; float:left; "></div>
+	</div>
+
+
+	<div style="width:800px; height:350; float:left;">
+	<div style="width:250px; height:100px; margin:0 auto;">
+		<table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>上限值</th>
+                <th>下限值</th>
+								<th>探头状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>37.5</td>
+                <td>35.8</td>
+                <td>连接</td>
+                <!-- <td>&nbsp</td> -->
+                <!-- <td>&nbsp</td> -->
+                <!-- <td>未连接</td> -->
+              </tr>
+            </tbody>
+    </table>
+	</div>
+  <div id="temp" style="width:800px; height:250px; float:left;"></div>
+	</div>
+
+	<div style="width:500px; height:350; float:left;">
+	
+	<div style="width:250px; height:100px; margin:0 auto;">
+		<table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>上限值</th>
+                <th>下限值</th>
+								<th>探头状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>139</td>
+                <td>120</td>
+                <td>连接</td>
+                <!-- <td>&nbsp</td> -->
+                <!-- <td>&nbsp</td> -->
+                <!-- <td>未连接</td> -->
+              </tr>
+            </tbody>
+    </table>
+	</div>
+  <div id="press" style="width:500px; height:250px; float:left;"></div>
+	</div>
+  <div style="clear:both; width:0px; height:0px;"></div>
+  </div>
+<script>
+
+var HEART = [];
+var HEARTINDEX = [];
+$.get("/static/data65.json", function(data){
+  console.log(data)
+
+data.map(function (item) {
+  HEART.push(item[1]);
+})
+
+data.map(function (item) {
+  HEARTINDEX.push(item[0]);
+})
+
+},"json");
+
+console.log(HEART);
+console.log(HEARTINDEX);
+
+
+option = {
+        tooltip: {
+        trigger: 'axis'
+    },
+	title: {
+		text: '       心电图'
+	},
+    xAxis: [
+        {
+            data: HEARTINDEX,
+        },
+    ],
+    yAxis: [
+        {
+            max: 250,
+            min: -50,
+            interval:50,
+        },
+       
+    ],
+		dataZoom: [{
+								startValue: '1'
+						}, {
+								type: 'inside'
+						}],
+    series: [
+        {
+            name:'人体温度',
+            type:'line',
+            symbol:'none',
+						data:HEART,
+            itemStyle : { 
+              normal: {
+                lineStyle:{
+                  <!-- color:'#ffde33', -->
+                  color:'#096',
+                        },
+                      }
+                        }
+        }
+    ]
+};
+
+var myChart = echarts.init(document.getElementById('heart'));
+setInterval(function (){
+  myChart.setOption(option);
+}, 2100);
+
+
+
+TEM = [];
+$.get("/htem/", function(data){
+  for(var key in data){
+  TEM.push(parseFloat(data[key]).toFixed(2));
+  }
+  console.log(TEM);
+},"json");
+
+option1 = {
+        tooltip: {
+        trigger: 'axis'
+    },
+	title: {
+		text: '       体温'
+	},
+    xAxis: [
+        {
+            type: 'category',
+            boundaryGap: true,
+            name: '第N次',
+            data:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49]
+              <!-- data: [], -->
+        },
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            scale: true,
+            name: '摄氏度',
+            max: 55,
+            min: 27,
+            boundaryGap: [0.2, 0.2]
+        },
+       
+    ],
+		dataZoom: [{
+                startValue: 1,
+						}, {
+								type: 'inside'
+						}],
+		visualMap: {
+								top: 10,
+								right: 10,
+                showLabel:false,
+                show:false,
+								pieces: [{
+										gt: 20,
+										lte: 35.8,
+										color: '#ffde33'
+								}, {
+										gt: 35.8,
+										lte: 37.5,
+										color: '#096'
+								}, {
+										gt: 37.5,
+										lte: 50,
+										color: '#AA314D'
+								}],
+								outOfRange: {
+										color: '#999'
+								}
+						},
+    series: [
+        {
+            name:'人体温度',
+            type:'line',
+						data:TEM,
+            symbolSize:10,
+            itemStyle : { 
+              normal: {
+                label : {
+                  show: true,
+                  color:'#999',
+                  textStyle:{
+                  color:'#999',
+                            },
+                        },
+                lineStyle:{
+                  type: 'dotted',
+                },
+                      }
+                        }
+        }
+    ]
+};
+
+var myChart2 = echarts.init(document.getElementById('temp'));
+setInterval(function (){
+  myChart2.setOption(option1);
+}, 2100);
+
+
+option3 = {
+				tooltip: {
+				trigger: 'axis'
+		},
+	  title: {
+		text: '   舒张压'
+	},
+		xAxis: [
+				{
+						type: 'category',
+						boundaryGap: true,
+						name: '第N次',
+						data: [],
+				},
+		],
+		yAxis: [
+				{
+						type: 'value',
+						scale: true,
+						name: 'mmHg',
+						max: 100,
+						min: 60,
+						boundaryGap: [0.2, 0.2]
+				},
+
+		],
+		dataZoom: [{
+								startValue: 0,
+						}, {
+								type: 'inside'
+						}],
+		visualMap: {
+								top: 10,
+								right: 10,
+                show:false,
+                showLabel:false,
+								pieces: [{
+										gt: 60,
+										lte: 80,
+										color: '#ffde33'
+								}, {
+										gt: 80,
+										lte: 89,
+										color: '#096'
+								}, {
+										gt: 89,
+										lte: 120,
+										color: '#AA314D'
+								}],
+								outOfRange: {
+										color: '#999'
+								}
+						},
+		series: [
+				{
+						name:'舒张压',
+						type:'line',
+            symbolSize:10,
+            itemStyle : { 
+              normal: {
+                label : {
+                  show: true,
+                  color:'#999',
+                  textStyle:{
+                  color:'#999',
+                            },
+                        },
+                lineStyle:{
+                  type: 'dotted'
+                },
+                      }
+                        },
+						data:[],
+				}
+		]
+};
+var countPress = 0
+var myChart3 = echarts.init(document.getElementById('relax'));
+	  setInterval(function (){
+      countPress += 1;
+      if(countPress>=50)
+      {
+        option3.series[0].data.shift();
+        option3.xAxis[0].data.shift();
+      }
+      option3.series[0].data.push(Math.round(Math.random() *6 + 88));
+      option3.xAxis[0].data.push(countPress);
+      myChart3.setOption(option3);
+}, 2100);
+
+
+
+option4 = {
+				tooltip: {
+				trigger: 'axis'
+		},
+	title: {
+		text: '   收缩压'
+	},
+	xAxis: [
+
+				{
+						type: 'category',
+						boundaryGap: true,
+						name: '第N次',
+            data: [],
+				},
+		],
+	yAxis: [
+				{
+						type: 'value',
+						scale: true,
+						name: 'mmHg',
+						max: 150,
+						min: 100,
+						boundaryGap: [0.2, 0.2]
+				},
+
+		],
+	dataZoom: [{
+								startValue: 0,
+						}, {
+								type: 'inside'
+						}],
+	visualMap: {
+								top: 10,
+								right: 10,
+                show:false,
+                showLabel:false,
+								pieces: [{
+										gt: 100,
+										lte: 120,
+										color: '#ffde33'
+								}, {
+										gt: 120,
+										lte: 139,
+										color: '#096'
+								}, {
+										gt: 139,
+										lte: 150,
+										color: '#AA314D'
+								}],
+								outOfRange: {
+										color: '#999'
+								}
+						},
+	series: [
+				{
+						name:'人体温度',
+						type:'line',
+            symbolSize:10,
+            itemStyle : { 
+              normal: {
+                label : {
+                  show: true,
+                  color:'#999',
+                  textStyle:{
+                  color:'#999',
+                            },
+                        },
+                lineStyle:{
+                  type: 'dotted'
+                },
+                      }
+                        },
+						data:[],
+				}
+		]
+};
+
+var countrelax = 0;
+var myChart4 = echarts.init(document.getElementById('press'));
+setInterval(function (){
+  countrelax += 1;
+  if(countrelax >=50)
+  {
+    option4.series[0].data.shift();
+    option4.xAxis[0].data.shift();
+  }
+  option4.series[0].data.push(Math.round(Math.random() * 5+140));
+  option4.xAxis[0].data.push(countrelax);
+  myChart4.setOption(option4);
+}, 2100);
+
+</script>
+</body>
+</html>
