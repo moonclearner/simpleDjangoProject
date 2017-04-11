@@ -10,6 +10,9 @@ class Htem(models.Model):
     values = models.DecimalField(max_digits=4, decimal_places=2)
     ctime = models.DateTimeField(default=timezone.now())
 
+    def __unicode__(self):
+        return str(self.values)
+
 
 class Hpres(models.Model):
     values = models.IntegerField()

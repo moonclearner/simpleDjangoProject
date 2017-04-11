@@ -6,7 +6,7 @@ from bbs import models
 class BBS_admin(admin.ModelAdmin):
     '''add display list'''
     list_display = ('title', 'summary', 'signature', 'author', 'Created_at')
-    list_filter = ('Created_at',)
+    list_filter = ('Created_at', 'title')
     search_fields = ('title', 'author__user__username')
     # because author is user table's ForeignKey
 
